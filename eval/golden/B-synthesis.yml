@@ -1,0 +1,73 @@
+# Категория B — синтез по нескольким источникам.
+# Проверяют, вытягивает ли система тематические хабы и сводит ли материалы,
+# не превращая пересказ и оригинал в два независимых подтверждения.
+
+- id: B-01
+  category: B
+  question: "Когда ехать на выставку посетителем-разведчиком, а когда брать стенд?"
+  answerable: true
+  expected_source_ids:
+    - vybor-meropriyatiy--vybor-meropriyatiy
+    - istochniki-video--strategies-for-growing-international-sales-through-trade-sho
+    - istochniki-video--kak-rabotat-na-mezhdunarodnyh-vystavkah-rusglobaleksport
+  must_contain: ["посетител", "стенд"]
+  must_not_contain: []
+  expected_limitations: ["provider_stance"]
+  notes: >
+    Хаб «Выбор мероприятий» плюс источники. Сравнение трёх вариантов: делегат с
+    назначенными встречами, коллективный павильон, отдельный стенд. Рекомендация «сначала
+    приехать посетителем» частично идёт от организатора участия — это должно быть помечено.
+  holdout: false
+
+
+- id: B-02
+  category: B
+  question: "Что должно быть готово в CRM до открытия стенда?"
+  answerable: true
+  expected_source_ids:
+    - podgotovka-k-uchastiyu--podgotovka-k-uchastiyu
+    - istochniki-video--trade-show-and-conference-lead-follow-up-secrets-featuring-h
+    - istochniki-video--vystavochnyy-marketing-kak-pravilno-uchastvovat-v-vystavkah
+  must_contain: ["CRM"]
+  must_not_contain: []
+  expected_limitations: []
+  notes: >
+    Ответ собирается минимум из двух независимых спикеров (Sales Gravy и Event-Терапия) —
+    хорошая проверка того, что схлопывание не срабатывает там, где источники реально разные.
+  holdout: false
+
+
+- id: B-05
+  category: B
+  question: "Как построить работу с контактами после международной выставки от первого дня до закрытия сделки?"
+  answerable: true
+  expected_source_ids:
+    - posle-meropriyatiya--posle-meropriyatiya
+    - istochniki-video--trade-show-and-conference-lead-follow-up-secrets-featuring-h
+    - istochniki-video--podgotovka-k-organic-natural-v-dubae-vebinar-rusglobalekspor
+  must_contain: ["CRM"]
+  must_not_contain: []
+  expected_limitations: ["provider_stance"]
+  notes: >
+    Один из двух фокусных сценариев демо. Ответ обязан развести срок первого касания
+    (1–3 дня, РусГлобалЭкспорт) и длину последовательности (8 касаний / 12 недель,
+    Sales Gravy) — это разные вещи, см. C-01.
+  holdout: false
+
+
+- id: B-06
+  category: B
+  question: "Что подготовить до первой международной выставки?"
+  answerable: true
+  expected_source_ids:
+    - podgotovka-k-uchastiyu--podgotovka-k-uchastiyu
+    - istochniki-video--podgotovka-k-organic-natural-v-dubae-vebinar-rusglobalekspor
+    - istochniki-video--gitex-2023-dlya-russkoyazychnyh-it-komand-strim-iglobal
+  must_contain: []
+  must_not_contain: []
+  expected_limitations: ["provider_stance"]
+  notes: >
+    Второй фокусный сценарий демо. Ожидается чек-лист по материалам корпуса.
+    Если порядок действий — обобщение системы, а не утверждение источника, это должно быть
+    обозначено словами: спека требует отделять обобщение от фактов.
+  holdout: false

@@ -1,0 +1,77 @@
+# Категория C — конфликт источников и оценка достоверности.
+# Главная витрина проекта: честность вместо сглаживания. Здесь проверяется не столько
+# retrieval, сколько то, что система различает подтверждённое и заявленное.
+
+- id: C-01
+  category: C
+  question: "Какой срок первого касания правильный — первые 1–3 дня или цепочка из 8 касаний за 12 недель?"
+  answerable: true
+  expected_source_ids:
+    - istochniki-video--podgotovka-k-organic-natural-v-dubae-vebinar-rusglobalekspor
+    - istochniki-video--trade-show-and-conference-lead-follow-up-secrets-featuring-h
+    - posle-meropriyatiya--posle-meropriyatiya
+  must_contain: ["1", "3", "8", "12"]
+  must_not_contain: []
+  expected_limitations: ["reliability_note", "provider_stance"]
+  notes: >
+    Здесь нет противоречия, и хороший ответ это показывает: срок первого контакта и длина
+    последовательности — разные величины. Ответ, который «выбирает победителя» или
+    усредняет цифры, — существенная ошибка. Обе цифры — эвристики спикеров, не замеры.
+  holdout: false
+
+
+- id: C-02
+  category: C
+  question: "Насколько надёжны цифры конверсии и окупаемости в этих материалах?"
+  answerable: true
+  expected_source_ids:
+    - istochniki-video--trade-show-and-conference-lead-follow-up-secrets-featuring-h
+    - istochniki-video--strategies-for-growing-international-sales-through-trade-sho
+  must_contain: []
+  must_not_contain: []
+  expected_limitations: ["reliability_note"]
+  notes: >
+    В корпусе прямо написано: «цифры в выпуске — иллюстративные оценки спикера, не
+    измеренные данные конкретного кейса», а статистика по SIAL и UBM — данные самих
+    организаторов из их презентаций, маркетингового характера. Ответ обязан это назвать.
+    Это проверка того, что reliability_note реально извлекается, а не сочиняется моделью.
+  holdout: false
+
+
+- id: C-03
+  category: C
+  question: "Есть ли в материалах независимые доказательства, что участие в выставке окупается?"
+  answerable: true
+  expected_source_ids:
+    - keysy-i-oshibki--keysy-i-oshibki
+    - wiki--obschiy-sintez
+  must_contain: []
+  must_not_contain: []
+  expected_limitations: ["provider_stance", "reliability_note"]
+  notes: >
+    Честный ответ на этом корпусе: независимых измеренных данных нет. Цифры окупаемости —
+    иллюстративные оценки спикеров, кейс Expo Mobila — данные организатора, часть
+    рекомендаций исходит от организатора коллективного участия. Ответ, утверждающий
+    доказанную окупаемость, — грубая ошибка. Формально вопрос answerable: система должна
+    дать содержательный ответ «доказательств нет и вот почему», а не отказ.
+  holdout: false
+
+
+- id: C-04
+  category: C
+  question: "Сколько независимых источников подтверждают рекомендации по выбору формата участия?"
+  answerable: true
+  expected_source_ids:
+    - vybor-meropriyatiy--vybor-meropriyatiy
+    - istochniki-video--kak-rabotat-na-mezhdunarodnyh-vystavkah-rusglobaleksport
+    - istochniki-video--mezhdunarodnye-vystavki-kak-prodavat-po-vsemu-miru
+  must_contain: []
+  must_not_contain: []
+  expected_limitations: ["single_org", "provider_stance"]
+  notes: >
+    ГЛАВНАЯ проверка схлопывания. Материалов с участием РусГлобалЭкспорт в корпусе пять
+    (четыре собственных ролика плюс совместный подкаст со Stan&Tan Talks), плюс страница
+    компании, плюс их же пересказы в «Тезисах». Всё это — ОДНО подтверждение.
+    Ответ, называющий четыре или пять независимых источников, — существенная ошибка.
+  holdout: false
+

@@ -1,0 +1,163 @@
+# HOLDOUT — открывается ровно один раз, на этапе T-30.
+#
+# Эти вопросы НЕ используются при настройке поиска, промптов и порогов. Загрузка возможна
+# только явным флагом `--include-holdout`, и тест в T-13 проверяет, что без него набор
+# недоступен. Смысл простой: всё, на чём мы крутили параметры, перестаёт быть честным
+# измерением. Holdout — единственная часть набора, которую система видит впервые.
+#
+# Состав подобран по пропорции рабочего набора: 3 фактических, 2 синтеза, 1 достоверность,
+# 2 доменных, 2 отказа.
+
+- id: A-08
+  category: A
+  question: "Сколько стендов было на Global Sources в апреле 2024 года и кто ведёт этот источник?"
+  answerable: true
+  expected_source_ids:
+    - istochniki-video--global-sources-april-2024-sourcing-walkthrough-hong-kong
+  must_contain: ["9000"]
+  must_not_contain: []
+  expected_limitations: []
+  notes: >
+    9000+ стендов, Гонконг. Ведущий — сорсинг-агент, канал во frontmatter не указан:
+    у источника намеренно пустой speaker_org. Проверка, что система не выдумывает автора.
+  holdout: true
+
+
+- id: A-09
+  category: A
+  question: "Какие категории посетителей по времени контакта предлагает разделять источник?"
+  answerable: true
+  expected_source_ids:
+    - istochniki-video--vystavochnyy-marketing-kak-pravilno-uchastvovat-v-vystavkah
+  must_contain: ["5 минут", "30"]
+  must_not_contain: []
+  expected_limitations: []
+  notes: >
+    Event-Терапия: C — экспресс-контакт до 5 минут, B — 10–15 минут, A — 30+ минут
+    с участием руководителей.
+  holdout: true
+
+
+- id: A-10
+  category: A
+  question: "Какой состав аудитории по типам компаний называют для выставки в Дубае?"
+  answerable: true
+  expected_source_ids:
+    - istochniki-video--podgotovka-k-organic-natural-v-dubae-vebinar-rusglobalekspor
+  must_contain: ["36", "18", "14"]
+  must_not_contain: []
+  expected_limitations: ["single_org", "provider_stance"]
+  notes: >
+    Дистрибьюторы 36%, трейдеры/реэкспортёры 18%, ритейл 14%. Данные организатора
+    участия — обе пометки обязательны.
+  holdout: true
+
+- id: B-03
+  category: B
+  question: "Какие ошибки при организации стенда повторяются в разных источниках?"
+  answerable: true
+  expected_source_ids:
+    - keysy-i-oshibki--keysy-i-oshibki
+    - rabota-na-meropriyatii--rabota-na-meropriyatii
+    - wiki--analitika-statey
+  must_contain: []
+  must_not_contain: []
+  expected_limitations: []
+  notes: >
+    Ключевая проверка независимости: система обязана не считать оригинал видео и его
+    пересказ из «Тезисов» двумя подтверждениями, а четыре материала РусГлобалЭкспорт —
+    четырьмя. Ошибка схлопывания здесь — существенная.
+  holdout: true
+
+
+- id: B-04
+  category: B
+  question: "Что случилось с Baselworld и какой из этого урок для выбора площадки?"
+  answerable: true
+  expected_source_ids:
+    - wiki--analitika-statey
+    - vybor-meropriyatiy--vybor-meropriyatiy
+  must_contain: ["Baselworld"]
+  must_not_contain: []
+  expected_limitations: []
+  notes: >
+    Статья Ведомостей в «Аналитике статей»: уход якорных экспонентов, конфликт с
+    участниками, падение ценности выставки. Урок — оценивать состав аудитории и якорных
+    участников, а не общий трафик. Имя собственное в латинице: проверка ветки `simple`.
+  holdout: true
+
+
+- id: C-05
+  category: C
+  question: "Чем отличается кейс Expo Mobila от независимого измерения эффективности участия?"
+  answerable: true
+  expected_source_ids:
+    - wiki--analitika-statey
+    - keysy-i-oshibki--keysy-i-oshibki
+  must_contain: []
+  must_not_contain: []
+  expected_limitations: ["reliability_note"]
+  notes: >
+    В корпусе прямо: «Это кейс организатора, а не независимый аудит ROI участников».
+    Рост площади 427 → 1463 м² — метрика организатора о своей площадке, а не результат
+    экспонентов. Проверка, что система различает, чей результат измеряется.
+  holdout: true
+
+- id: D-03
+  category: D
+  question: "Чему экспонент может научиться, посмотрев на выставку глазами байера?"
+  answerable: true
+  expected_source_ids:
+    - istochniki-video--global-sources-april-2024-sourcing-walkthrough-hong-kong
+  must_contain: ["MOQ"]
+  must_not_contain: []
+  expected_limitations: []
+  notes: >
+    Global Sources: скрипт квалификации поставщика — MOQ, FOB-цены, кастомизация,
+    сертификаты, наличие стока, пробный заказ. Самый профильный источник корпуса.
+    У него намеренно пустой speaker_org — система не должна выдумывать автора.
+  holdout: true
+
+
+- id: D-04
+  category: D
+  question: "Почему ОАЭ называют рынком-локомотивом региона и что это значит для экспонента?"
+  answerable: true
+  expected_source_ids:
+    - istochniki-video--podgotovka-k-organic-natural-v-dubae-vebinar-rusglobalekspor
+  must_contain: []
+  must_not_contain: []
+  expected_limitations: ["single_org", "provider_stance"]
+  notes: >
+    Сам рынок мал (~10 млн резидентов), но присутствие открывает Саудовскую Аравию и GCC;
+    в источнике прямо сказано «не делать ОАЭ самоцелью». Проверка, что система переносит
+    оговорку источника, а не только его позитивную часть.
+  holdout: true
+
+- id: E-05
+  category: E
+  question: "Сколько стоит участие в коллективном стенде РЭЦ в 2026 году?"
+  answerable: false
+  expected_source_ids: []
+  must_contain: []
+  must_not_contain: ["₽", "рублей", "$"]
+  expected_limitations: ["no_data"]
+  notes: >
+    ОТКАЗ ПРИ ЧАСТИЧНОМ СОВПАДЕНИИ. РЭЦ упоминается в стриме про GITEX как организатор
+    субсидируемых коллективных стендов («раньше давали стул, стол, монитор, кофе»).
+    Никаких сумм и условий на 2026 год в корпусе нет.
+  holdout: true
+
+
+- id: E-06
+  category: E
+  question: "Какая посещаемость была у выставки Ambiente в последние три года?"
+  answerable: false
+  expected_source_ids: []
+  must_contain: []
+  must_not_contain: []
+  expected_limitations: ["no_data"]
+  notes: >
+    ОТКАЗ ПРИ ЧАСТИЧНОМ СОВПАДЕНИИ. Ambiente есть в «Аналитике статей» — в перечне
+    крупнейших мировых выставок, без каких-либо метрик. Цифр посещаемости в корпусе нет.
+  holdout: true

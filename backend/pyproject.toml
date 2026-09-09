@@ -31,3 +31,5 @@ target-version = "py311"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = ["live: реальный вызов claude CLI/API, вне обычного прогона (T-15)"]
+addopts = "-m 'not live'"

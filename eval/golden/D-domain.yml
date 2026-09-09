@@ -1,0 +1,36 @@
+# Категория D — региональная и отраслевая специфика.
+# Проверяют, достаёт ли поиск профильную фактуру, а не общие рассуждения о выставках.
+
+- id: D-01
+  category: D
+  question: "Что источники говорят про специфику работы на Ближнем Востоке — GITEX и Дубай?"
+  answerable: true
+  expected_source_ids:
+    - istochniki-video--gitex-2023-dlya-russkoyazychnyh-it-komand-strim-iglobal
+    - istochniki-video--podgotovka-k-organic-natural-v-dubae-vebinar-rusglobalekspor
+  must_contain: ["GITEX"]
+  must_not_contain: []
+  expected_limitations: ["provider_stance"]
+  notes: >
+    Ожидается: состав региональной аудитории, политическая «карта дня», состав стенда,
+    подарки, роли по местной картине мира, фильтрация мошеннических предложений.
+    Имя собственное латиницей — проверка ветки `simple` в поиске.
+  holdout: false
+
+
+- id: D-02
+  category: D
+  question: "Какой нормативный комплект нужен экспоненту FMCG для Organic & Natural в Дубае?"
+  answerable: true
+  expected_source_ids:
+    - istochniki-video--podgotovka-k-organic-natural-v-dubae-vebinar-rusglobalekspor
+    - meropriyatiya--organic-natural-dubay
+  must_contain: []
+  must_not_contain: []
+  expected_limitations: ["single_org", "provider_stance"]
+  notes: >
+    Сертификаты, образцы, прайсы FOB/FCA, визитки, QR-контакт, переводчики.
+    Единственный источник — организатор участия, обе пометки обязательны.
+    Название с амперсандом — отдельная проверка токенизации запроса.
+  holdout: false
+

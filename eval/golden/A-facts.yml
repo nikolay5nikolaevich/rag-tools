@@ -1,0 +1,117 @@
+# Категория A — фактические вопросы с одним источником.
+# Проверяют retrieval и точность переноса цифр. Каждый факт сверен по файлу корпуса.
+# Разметка: тех-лид, T-03. Исполнители тикетов её не правят.
+
+- id: A-01
+  category: A
+  question: "Сколько касаний и какая пауза в базовом правиле follow-up после события?"
+  answerable: true
+  expected_source_ids:
+    - istochniki-video--trade-show-and-conference-lead-follow-up-secrets-featuring-h
+  must_contain: ["8", "12 недел"]
+  must_not_contain: []
+  expected_limitations: ["reliability_note"]
+  notes: >
+    Harriet Mellor, Sales Gravy. Дословно: «8 касаний, затем пауза 12 недель, затем заход
+    снова». Источник помечен как подкаст про B2B-продажи в целом, цифры — иллюстративные
+    оценки спикера; оговорка обязана появиться в ответе.
+  holdout: false
+
+
+- id: A-02
+  category: A
+  question: "Через какой срок закрылась сделка, начатая на конференции по кибербезопасности?"
+  answerable: true
+  expected_source_ids:
+    - istochniki-video--trade-show-and-conference-lead-follow-up-secrets-featuring-h
+  must_contain: ["20 месяц"]
+  must_not_contain: []
+  expected_limitations: ["reliability_note"]
+  notes: >
+    CyberCon, ~20 месяцев. Кейс также пересказан в хабе «Кейсы и ошибки» — там прямо сказано,
+    что он не доказывает средний цикл выставочного лида. Хороший ответ это удерживает.
+  holdout: false
+
+
+- id: A-03
+  category: A
+  question: "Какая стоимость участия названа спикером и какая сделка её оправдывает?"
+  answerable: true
+  expected_source_ids:
+    - istochniki-video--trade-show-and-conference-lead-follow-up-secrets-featuring-h
+  must_contain: ["50", "100", "500"]
+  must_not_contain: []
+  expected_limitations: ["reliability_note"]
+  notes: >
+    Стенд + перелёты + люди ≈ $50–100k; одна сделка ~$500k оправдывает участие.
+    Ключевая проверка: система обязана назвать это иллюстративной оценкой спикера,
+    а не нормативом. Ответ, подающий цифры как отраслевую норму, — существенная ошибка.
+  holdout: false
+
+
+- id: A-04
+  category: A
+  question: "За какой срок рекомендуется обработать контакты после возвращения с выставки?"
+  answerable: true
+  expected_source_ids:
+    - istochniki-video--podgotovka-k-organic-natural-v-dubae-vebinar-rusglobalekspor
+  must_contain: ["1", "3", "дн"]
+  must_not_contain: []
+  expected_limitations: ["single_org", "provider_stance"]
+  notes: >
+    «Обработать 100% контактов через 1–3 дня после возвращения». Источник —
+    РусГлобалЭкспорт, организатор коллективного участия. Обе пометки об ограничениях
+    обязаны сработать: подтверждение одно и оно от заинтересованной стороны.
+  holdout: false
+
+
+- id: A-05
+  category: A
+  question: "Сколько визиток рекомендуется брать на сотрудника и сколько всего раздаточных материалов?"
+  answerable: true
+  expected_source_ids:
+    - istochniki-video--podgotovka-k-organic-natural-v-dubae-vebinar-rusglobalekspor
+    - istochniki-video--mezhdunarodnye-vystavki-kak-prodavat-po-vsemu-miru
+  must_contain: ["150", "200", "300"]
+  must_not_contain: []
+  expected_limitations: []
+  notes: >
+    150–200 визиток на сотрудника, всего около 300 единиц материалов.
+    ВНИМАНИЕ: в заготовке спеки (раздел 8, вопрос 5) был вопрос про «200 визиток без
+    обработки» в Event-Терапии — такого факта в корпусе НЕТ, число 200 относится к раздатке.
+    Вопрос заменён на проверяемый. Это же ловушка на выдумывание: система не должна
+    склеивать «200 визиток» с сюжетом про необработанные контакты.
+  holdout: false
+
+
+- id: A-06
+  category: A
+  question: "Как изменилась площадь выставки Expo Mobila после разбора провала?"
+  answerable: true
+  expected_source_ids:
+    - wiki--analitika-statey
+  must_contain: ["427", "1463"]
+  must_not_contain: []
+  expected_limitations: ["reliability_note"]
+  notes: >
+    427 → 1463 м² (рост примерно в 3,4 раза), кейс Moldexpo. В корпусе прямо помечено:
+    это данные авторов и организатора, не независимый аудит ROI участников.
+    Ответ без этой оговорки — существенная ошибка.
+  holdout: false
+
+
+- id: A-07
+  category: A
+  question: "Какие CRM и инструменты названы в источниках для работы с выставочными лидами?"
+  answerable: true
+  expected_source_ids:
+    - istochniki-video--trade-show-and-conference-lead-follow-up-secrets-featuring-h
+  must_contain: ["HubSpot", "Salesforce", "Pipedrive"]
+  must_not_contain: []
+  expected_limitations: []
+  notes: >
+    CRM — HubSpot, Salesforce, Pipedrive; управление командой — Asana; недельный scorecard.
+    Проверка ветки `simple` в полнотекстовом поиске: на морфологии `russian` эти имена
+    разваливаются. Если вопрос проваливается — виноват поиск, а не генератор.
+  holdout: false
+
