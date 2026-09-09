@@ -1,0 +1,310 @@
+{
+  "corpus_version": "v1",
+  "snapshot_date": "2026-09-09",
+  "vault_source": "C:\\Users\\TBG\\Desktop\\программирование\\youtube\\ErgoVault",
+  "file_count": 43,
+  "total_words": 55970,
+  "files": [
+    {
+      "path": "wiki/Аналитика курсов.md",
+      "sha256": "998840514bf9d877b4e336eb77ce975c87ab1298ca2aa51f53fac4383f6d4c6d",
+      "bytes": 1172,
+      "words": 99,
+      "visibility": "public"
+    },
+    {
+      "path": "wiki/Аналитика статей.md",
+      "sha256": "c4300fd7bce06e18a249464387edd884ba1734906ff6051426a056578d8b6c67",
+      "bytes": 87164,
+      "words": 6287,
+      "visibility": "public"
+    },
+    {
+      "path": "wiki/Выбор мероприятий/Выбор мероприятий.md",
+      "sha256": "2c55b401c270e86fac0721e7c962eb9ec5c2beec196d7a14e309e588680b5fd4",
+      "bytes": 10550,
+      "words": 813,
+      "visibility": "public"
+    },
+    {
+      "path": "wiki/Источники видео/GITEX 2023 для русскоязычных IT-команд — стрим iGlobal.md",
+      "sha256": "feb7a0056ff4204e257107f58e1054ffc00c1f6ef99646df97c546077a4ccdfa",
+      "bytes": 16732,
+      "words": 1270,
+      "visibility": "public"
+    },
+    {
+      "path": "wiki/Источники видео/Global Sources April 2024 Sourcing Walkthrough — Hong Kong.md",
+      "sha256": "d8994e1b96d52de38dcab7a1d49d3dec385323f95d747f3e8c3ce15eede10882",
+      "bytes": 12937,
+      "words": 1086,
+      "visibility": "public"
+    },
+    {
+      "path": "wiki/Источники видео/Strategies for growing international sales through trade shows.md",
+      "sha256": "3ac86db0b69e798482f2c004fc1e7cd6e0aaafe726779db55a67bc7e7815ef4b",
+      "bytes": 21155,
+      "words": 1796,
+      "visibility": "public"
+    },
+    {
+      "path": "wiki/Источники видео/Trade Show and Conference Lead Follow Up Secrets featuring Harriet Mellor.md",
+      "sha256": "5a2d4cdf52eff787f506545076f71c6d9d9e2ba11f809a24185bd9496a2579fa",
+      "bytes": 15744,
+      "words": 1321,
+      "visibility": "public"
+    },
+    {
+      "path": "wiki/Источники видео/Zéro 1 Hebdo — VivaTech 2021.md",
+      "sha256": "5e7dda8d9cac45bd6e59bcc801c822a66a8f4a0b73dda5e464103bae99720f80",
+      "bytes": 12544,
+      "words": 1012,
+      "visibility": "public"
+    },
+    {
+      "path": "wiki/Источники видео/uCloudlink 2025 Product Launch — MWC Barcelona.md",
+      "sha256": "0161d603262475258efec36af46548f12cc28cb2e6402306e0578d23edbac293",
+      "bytes": 10911,
+      "words": 906,
+      "visibility": "public"
+    },
+    {
+      "path": "wiki/Источники видео/Бизнес на международной торговле — International Trade Business.md",
+      "sha256": "8160e1d2c0ecc8df4c7334d3eca5640c70fd90e9c619c5f9f507e7023f77981a",
+      "bytes": 25854,
+      "words": 1866,
+      "visibility": "public"
+    },
+    {
+      "path": "wiki/Источники видео/Выставочный маркетинг — как правильно участвовать в выставках — Event-Терапия.md",
+      "sha256": "8a3cbcd7bf0494ceb3af8ef39ecec2c4549661da9e8153768773ba014bbbc7cb",
+      "bytes": 22546,
+      "words": 1590,
+      "visibility": "public"
+    },
+    {
+      "path": "wiki/Источники видео/Источники видео.md",
+      "sha256": "b05807787272208dfebc7e299fdd5d0a7d342700f09b3eaf57075609ce9e7847",
+      "bytes": 7764,
+      "words": 622,
+      "visibility": "public"
+    },
+    {
+      "path": "wiki/Источники видео/Как работать на международных выставках — РусГлобалЭкспорт.md",
+      "sha256": "8ee2c4c70b9b87ed7b6e5cfeb1cc9e337ddb777c7a61d0c44021ff8b4a3456d1",
+      "bytes": 17183,
+      "words": 1245,
+      "visibility": "public"
+    },
+    {
+      "path": "wiki/Источники видео/Международные выставки и как на них работать.md",
+      "sha256": "83d901fb8dffa1353577db3a78a539544763a9499c7bcd39fce64734fd926c87",
+      "bytes": 24382,
+      "words": 1819,
+      "visibility": "public"
+    },
+    {
+      "path": "wiki/Источники видео/Международные выставки — как продавать по всему миру.md",
+      "sha256": "6f6adafcfe4ce9b9cfcf8b2b4c0af43d063c7b5f4bcb3c7d927399e2644c1d09",
+      "bytes": 23093,
+      "words": 1707,
+      "visibility": "public"
+    },
+    {
+      "path": "wiki/Источники видео/Подготовка к Organic & Natural в Дубае — вебинар Русглобалэкспорт.md",
+      "sha256": "1eda4a4648394689f79cba5723330d9d2caf84a3a024f18371f43854d2102239",
+      "bytes": 19751,
+      "words": 1548,
+      "visibility": "public"
+    },
+    {
+      "path": "wiki/Источники видео/Работа на выставке — приглашение клиентов и продавливание заказов.md",
+      "sha256": "aaf1c2371a1a30f2b30be1d0e45a4f87fbcd0a983a10c67dfdb55e0bbdcd8beb",
+      "bytes": 15291,
+      "words": 1100,
+      "visibility": "public"
+    },
+    {
+      "path": "wiki/Итоговый отчёт.md",
+      "sha256": "dc65bf3dee33b7f6f1f4aef11bf3d3fcb66241784cc63d41677d662396e0a689",
+      "bytes": 14292,
+      "words": 1145,
+      "visibility": "public"
+    },
+    {
+      "path": "wiki/Кейсы и ошибки/Кейсы и ошибки.md",
+      "sha256": "f87930b92a9e0bb5998e91518b45501bf75de5c8db3a601cab53f8c71b8174b2",
+      "bytes": 10860,
+      "words": 864,
+      "visibility": "public"
+    },
+    {
+      "path": "wiki/Компании/RusGlobalExport.md",
+      "sha256": "95aa380fdb11d5f8d36bb339dd6a437aee6af015b62a07d034e67eaae6d9bc22",
+      "bytes": 5005,
+      "words": 353,
+      "visibility": "public"
+    },
+    {
+      "path": "wiki/Компании/Компании.md",
+      "sha256": "2d67fb36da7f670d406d9f9b56e07162e7d787e90bc663e47dcdd4f602953135",
+      "bytes": 873,
+      "words": 60,
+      "visibility": "public"
+    },
+    {
+      "path": "wiki/Курсы по международным выставкам — анализ.md",
+      "sha256": "f221b7e21c1d8b28aa43e0501d4f0172a2f7cc5b602ab731c7927f6de94de740",
+      "bytes": 108082,
+      "words": 8334,
+      "visibility": "public"
+    },
+    {
+      "path": "wiki/Мероприятия/Organic & Natural — Дубай.md",
+      "sha256": "ae385a99be1caf75f15f4eda39b6feeef21eead93e48bf523f5b388e16d4898b",
+      "bytes": 4041,
+      "words": 319,
+      "visibility": "public"
+    },
+    {
+      "path": "wiki/Мероприятия/Мероприятия.md",
+      "sha256": "48f28624ad57f1d5bcc61364705338661088bea1bc75c77bd888e0c882af3efc",
+      "bytes": 735,
+      "words": 57,
+      "visibility": "public"
+    },
+    {
+      "path": "wiki/Навигатор исследования.md",
+      "sha256": "04f2695b5540be1324cdbfae8aabb70523d9825935205f14ac5d1dda4281edb9",
+      "bytes": 9804,
+      "words": 784,
+      "visibility": "public"
+    },
+    {
+      "path": "wiki/Общий синтез.md",
+      "sha256": "2fa20a0e8452cf13943c9afc359dd2c20e0a45f8ce2b1ec9ed0908c4ed54a67b",
+      "bytes": 16502,
+      "words": 1291,
+      "visibility": "public"
+    },
+    {
+      "path": "wiki/Подготовка к участию/Подготовка к участию.md",
+      "sha256": "aa15ae273adeb19b7f8d5c383fa3e05aa05748a3c39b02efc3021e1000bea10f",
+      "bytes": 12050,
+      "words": 922,
+      "visibility": "public"
+    },
+    {
+      "path": "wiki/После мероприятия/После мероприятия.md",
+      "sha256": "ed32965f979a5e0d4abf4da30b0069720d2dddd32e82d57f03b32d6c92dbf519",
+      "bytes": 12362,
+      "words": 983,
+      "visibility": "public"
+    },
+    {
+      "path": "wiki/Работа на мероприятии/Работа на мероприятии.md",
+      "sha256": "6b068cd225f8515d418b0bb393493279699a9ff28a030b20009375fc1cc4533d",
+      "bytes": 12879,
+      "words": 992,
+      "visibility": "public"
+    },
+    {
+      "path": "wiki/Тезисы видео/Бизнес на международной торговле — International Trade Business.md",
+      "sha256": "96e1346b196d54c6baa176c77c88c83d778ef5c078ed9b77a9de58727b8fede4",
+      "bytes": 16681,
+      "words": 1225,
+      "visibility": "public"
+    },
+    {
+      "path": "wiki/Тезисы видео/Видео 01 — Trade Show and Conference Lead Follow Up Secrets featuring Harriet Mellor.md",
+      "sha256": "e308e813b05c1cf3feca1eee44f95d7548a0a1f22a4ac60f1b56875df630ae09",
+      "bytes": 13248,
+      "words": 1111,
+      "visibility": "public"
+    },
+    {
+      "path": "wiki/Тезисы видео/Видео 02 — Strategies for growing international sales through trade shows.md",
+      "sha256": "96c128c90f0a2283df597b2add81b0e5dc03e9c2fb73e54778cff5f7f1f5da27",
+      "bytes": 16462,
+      "words": 1337,
+      "visibility": "public"
+    },
+    {
+      "path": "wiki/Тезисы видео/Видео 03 — Zéro 1 Hebdo — VivaTech 2021.md",
+      "sha256": "0019ec4bb438d78a9ac16d11cbb41c071106b1111fd57fa6de36178c76db6141",
+      "bytes": 10574,
+      "words": 851,
+      "visibility": "public"
+    },
+    {
+      "path": "wiki/Тезисы видео/Видео 04 — uCloudlink 2025 Product Launch — MWC Barcelona.md",
+      "sha256": "9298b394f003417a4100adcda859b17c68f0308a39a9cf3639df091da1874a07",
+      "bytes": 8125,
+      "words": 647,
+      "visibility": "public"
+    },
+    {
+      "path": "wiki/Тезисы видео/Видео 05 — Global Sources April 2024 — Hong Kong.md",
+      "sha256": "04d0af80d5c35b4cd2b5e88e175c213d2988bd9021287f0480dabad61e18bb4f",
+      "bytes": 9302,
+      "words": 741,
+      "visibility": "public"
+    },
+    {
+      "path": "wiki/Тезисы видео/Видео 06 — Приглашение клиентов и продавливание заказов на выставке.md",
+      "sha256": "8581535bedeaf784a8de4b3e55ff971f5f68ee26835bf7863d967acd64b292ff",
+      "bytes": 11307,
+      "words": 829,
+      "visibility": "public"
+    },
+    {
+      "path": "wiki/Тезисы видео/Видео 07 — GITEX 2023 для русскоязычных IT-команд.md",
+      "sha256": "b1e30d7b236f25c46c4d61954273b2070f1700f4c1aafe25239066ff7e47becd",
+      "bytes": 10933,
+      "words": 806,
+      "visibility": "public"
+    },
+    {
+      "path": "wiki/Тезисы видео/Видео 08 — Подготовка к Organic & Natural в Дубае.md",
+      "sha256": "1b74b876a0d90c4a593e331fe3a68b1d489cb6b74afe89f89ee658bb332bab80",
+      "bytes": 10730,
+      "words": 851,
+      "visibility": "public"
+    },
+    {
+      "path": "wiki/Тезисы видео/Видео 09 — Международные выставки — как продавать по всему миру.md",
+      "sha256": "3a54e7193873e4820bbc7c8fa2263e8001ebcf827e820fa37e713c64834117a2",
+      "bytes": 20342,
+      "words": 1498,
+      "visibility": "public"
+    },
+    {
+      "path": "wiki/Тезисы видео/Видео 10 — Выставочный маркетинг — как правильно участвовать в выставках.md",
+      "sha256": "ff0110d586dc9e686d45edc04edbbd87bac1a078207c83af356ecd416d1baf1f",
+      "bytes": 17124,
+      "words": 1260,
+      "visibility": "public"
+    },
+    {
+      "path": "wiki/Тезисы видео/Видео 11 — Как работать на международных выставках.md",
+      "sha256": "f56997e88859718e54951bad879198b2879db2f2ca031113ee4ce94b49f3536c",
+      "bytes": 9939,
+      "words": 712,
+      "visibility": "public"
+    },
+    {
+      "path": "wiki/Тезисы видео/Международные выставки и как на них работать.md",
+      "sha256": "7ab5d19c63c8ae0d5b34eccd7b3eae0ef9c0d847e99f999dce7a545c6193fb9d",
+      "bytes": 19922,
+      "words": 1500,
+      "visibility": "public"
+    },
+    {
+      "path": "wiki/Тезисы видео/Тезисы видео.md",
+      "sha256": "89c6a49001ac4363d9e4117b2f4e90cb2453aebe27aca7afd3c30cd7c4680804",
+      "bytes": 4993,
+      "words": 411,
+      "visibility": "public"
+    }
+  ]
+}

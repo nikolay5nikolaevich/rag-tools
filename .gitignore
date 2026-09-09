@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.venv/
+.env
+node_modules/
+dist/
+corpus/*/index/*.npy
+corpus/pilot/
+eval/runs/
+.pytest_cache/
+.ruff_cache/
