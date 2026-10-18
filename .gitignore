@@ -5,7 +5,14 @@ __pycache__/
 node_modules/
 dist/
 corpus/*/index/*.npy
+corpus/*/index/embeddings.*.ids.json
+corpus/*/index/*_report.md
 corpus/pilot/
 eval/runs/
+eval/reports/[0-9]*.md
 .pytest_cache/
 .ruff_cache/
+*.egg-info/
+*.tsbuildinfo
+.claude/settings.local.json
+answer.json

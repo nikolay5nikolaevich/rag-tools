@@ -6,8 +6,8 @@ from pathlib import Path
 
 from typer.testing import CliRunner
 
+from ergovault.chunking import chunk_markdown
 from ergovault.cli import app
-from ergovault.ingest.markdown import chunk_markdown
 from ergovault.models import Chunk, Source
 
 ROOT = Path(__file__).parents[2]

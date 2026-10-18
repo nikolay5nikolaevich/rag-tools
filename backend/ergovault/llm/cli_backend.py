@@ -1,8 +1,8 @@
 """Бэкенд `cli`: генерация через Claude Code CLI по подписке, без платного ключа.
 
-Команда и флаги минимизации служебного оверхеда — docs/tickets/T-15-llm-provider.md;
-замеры на этой машине — docs/tickets/T-15-overhead.md. Аргументы передаются списком,
-без `shell=True`: в путях корпуса есть кириллица и пробелы (требование T-15 к Windows).
+Аргументы передаются списком, без `shell=True`: в путях корпуса есть кириллица и пробелы.
+Пользовательское сообщение идёт через stdin, а не аргументом: в Windows командная строка
+ограничена 32 767 символами, а вопрос с восемью фрагментами корпуса доходит до ~30 000.
 """
 
 from __future__ import annotations
@@ -15,12 +15,10 @@ import time
 from ergovault.llm.base import LLMResponse
 from ergovault.llm.pricing import billed_cost_usd
 
-# Список должен буквально совпадать с флагом --disallowedTools из тикета T-15:
-# cli-провайдер отвечает только текстом, инструменты Claude Code ему не нужны.
-DISALLOWED_TOOLS = [
-    "Bash", "Read", "Write", "Edit", "Glob", "Grep", "WebSearch", "WebFetch",
-    "Task", "NotebookEdit", "Artifact", "Skill", "ToolSearch",
-]
+# Провайдер отвечает только текстом. Встроенные инструменты отключаются целиком
+# (`--tools ""`), а не списком запретов: CLI добавляет новые инструменты, и прежний
+# список пропускал SendMessage, ListAgents, TaskOutput, Monitor и другие — модель
+# делала несколько ходов вместо ответа по переданному тексту.
 
 DEFAULT_TIMEOUT_S = 120.0
 MAX_RETRIES = 3
@@ -43,11 +41,11 @@ class NotLoggedInError(LLMError):
         )
 
 
-def _build_command(*, user: str, system: str, model: str) -> list[str]:
+def _build_command(*, system: str, model: str) -> list[str]:
     claude_path = shutil.which("claude") or "claude"
     return [
         claude_path,
-        "-p", user,
+        "-p",
         "--output-format", "json",
         "--model", model,
         "--system-prompt", system,
@@ -55,14 +53,14 @@ def _build_command(*, user: str, system: str, model: str) -> list[str]:
         "--disable-slash-commands",
         "--strict-mcp-config",
         "--setting-sources", "",
-        "--disallowedTools", *DISALLOWED_TOOLS,
+        "--tools", "",
     ]
 
 
 def parse_result_item(stdout: str) -> dict:
     """Разбирает JSON-массив ответа cli, возвращает элемент с type == 'result'.
 
-    Элемент с type == 'result' не обязан быть последним в массиве (T-15, «Приёмка») —
+    Элемент с type == 'result' не обязан быть последним в массиве —
     поэтому ищем по полю, а не берём items[-1].
     """
     try:
@@ -95,8 +93,8 @@ class CliLLMProvider:
     ) -> LLMResponse:
         # cache_system и max_tokens не используются: у headless-режима нет флагов
         # управления кэшем и лимитом вывода — параметры приняты ради единого
-        # интерфейса с api-бэкендом (T-15).
-        command = _build_command(user=user, system=system, model=model)
+        # интерфейса с api-бэкендом.
+        command = _build_command(system=system, model=model)
 
         last_error: Exception | None = None
         for attempt in range(self._max_retries):
@@ -104,6 +102,7 @@ class CliLLMProvider:
             try:
                 proc = subprocess.run(
                     command,
+                    input=user,
                     capture_output=True,
                     text=True,
                     encoding="utf-8",
@@ -156,5 +155,5 @@ class CliLLMProvider:
             )
 
         raise LLMError(
-            f"claude CLI не ответил после {self._max_retries} попыток"
+            f"claude CLI не ответил после {self._max_retries} попыток: {last_error}"
         ) from last_error

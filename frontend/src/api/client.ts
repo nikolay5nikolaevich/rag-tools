@@ -1,5 +1,6 @@
-// Fetch-слой. Базовый URL — из env (VITE_API_BASE_URL). Пока API нет (T-22),
-// запросы перехватывает msw; переключение на живой бэкенд — смена одной переменной.
+// Fetch-слой. Базовый URL — из env (VITE_API_BASE_URL); по умолчанию запросы идут
+// на текущий origin. Моки msw включаются отдельно (VITE_USE_MOCKS=on) и в обычном
+// запуске выключены — фронт работает с живым API.
 
 import type {
   AnswerPayload,
@@ -7,7 +8,6 @@ import type {
   ApiErrorCode,
   AskRequest,
   ChunkView,
-  EvalSummary,
   FeedbackRequest,
   Health,
   Source,
@@ -44,7 +44,12 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
   if (!response.ok) {
     let code: ApiErrorCode = "internal";
-    let message = `Запрос завершился с кодом ${response.status}`;
+    // Тела §8 может не быть вовсе: упавший или ещё не поднятый бэкенд отвечает через
+    // прокси голым 5xx. Тогда пользователю нужен не код ответа, а что именно случилось.
+    let message =
+      response.status >= 500
+        ? "Сервис недоступен. Проверьте, что бэкенд запущен, и повторите запрос."
+        : `Запрос завершился с кодом ${response.status}`;
     try {
       const body = (await response.json()) as ApiErrorBody;
       if (body?.error) {
@@ -89,21 +94,15 @@ export function sendFeedback(payload: FeedbackRequest, signal?: AbortSignal): Pr
   });
 }
 
-/** GET /api/eval/summary */
-export function getEvalSummary(signal?: AbortSignal): Promise<EvalSummary> {
-  return request<EvalSummary>("/api/eval/summary", { signal });
-}
-
 /** GET /healthz */
 export function getHealth(signal?: AbortSignal): Promise<Health> {
   return request<Health>("/healthz", { signal });
 }
 
 /**
- * `POST /api/feedback` требует `query_id` (§8), но контракт не говорит, откуда фронт его
- * берёт: в `AnswerPayload` отдельного поля нет, `meta` — свободный словарь (§7).
- * До ответа тех-лида читаем `meta.query_id`; если его нет — кнопки фидбека остаются
- * видимыми, но неактивными, и это видно, а не замаскировано.
+ * `query_id` для `POST /api/feedback` API возвращает в `meta.query_id` (§8). Если поля
+ * нет (старый ответ, другой бэкенд), кнопки отзыва остаются видимыми, но неактивными:
+ * отсутствие идентификатора видно, а не замаскировано.
  */
 export function queryIdOf(answer: AnswerPayload): string | null {
   const value = answer.meta?.["query_id"];

@@ -136,6 +136,35 @@ def test_cli_backend_calls_subprocess_without_shell(monkeypatch: pytest.MonkeyPa
     assert captured["kwargs"].get("shell", False) is False
 
 
+def test_cli_backend_sends_user_prompt_via_stdin(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Восемь фрагментов корпуса дают до ~30 000 символов, а командная строка Windows
+    # ограничена 32 767: сообщение аргументом упало бы на длинных фрагментах.
+    captured: dict = {}
+
+    def fake_run(command, **kwargs):
+        captured["command"] = command
+        captured["input"] = kwargs.get("input")
+        return _FakeCompletedProcess(stdout=FIXTURE.read_text(encoding="utf-8"), returncode=0)
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+    user = "вопрос " + "фрагмент " * 4000
+    CliLLMProvider().complete(system="сист", user=user, model="claude-haiku-4-5-20251001")
+
+    assert captured["input"] == user
+    assert all(user not in part for part in captured["command"])
+
+
+def test_cli_backend_disables_all_builtin_tools() -> None:
+    # Список запретов устаревал с каждой версией CLI: модель получала SendMessage,
+    # TaskOutput и другие инструменты. Пустой --tools отключает их все.
+    from ergovault.llm.cli_backend import _build_command
+
+    command = _build_command(system="сист", model="claude-haiku-4-5-20251001")
+    position = command.index("--tools")
+    assert command[position + 1] == ""
+    assert "--disallowedTools" not in command
+
+
 def test_cli_backend_parses_fixture_into_llmresponse(monkeypatch: pytest.MonkeyPatch) -> None:
     def fake_run(command, **kwargs):
         return _FakeCompletedProcess(stdout=FIXTURE.read_text(encoding="utf-8"), returncode=0)

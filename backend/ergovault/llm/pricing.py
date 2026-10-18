@@ -1,6 +1,6 @@
 """Прайс на модели Claude, $/1M токенов. Нормативный расчёт `billed_cost_usd` — по
 токенам НАШЕГО промпта и ответа (docs/CONTRACTS.md §9), не по `total_cost_usd` из
-cli-бэкенда: в тот зашит служебный оверхед headless-режима (~17k токенов, T-15).
+cli-бэкенда: в тот входит служебный оверхед headless-режима.
 
 Ставки кэша — стандартное соотношение Anthropic для TTL 5 минут (умолчание
 `cache_control: {"type": "ephemeral"}`, без явного `ttl: "1h"`): запись = 1.25× цены
@@ -34,7 +34,7 @@ def _price(input_per_mtok: float, output_per_mtok: float) -> ModelPrice:
 
 
 # Модели, реально используемые проектом (EV_GEN_MODEL, EV_JUDGE_MODEL, CONTRACTS.md §9)
-# плюс haiku — дешёвая модель для замеров оверхеда и тестов (T-15-overhead.md).
+# плюс haiku — дешёвая модель для замеров оверхеда и тестов.
 PRICES: dict[str, ModelPrice] = {
     "claude-opus-5": _price(5.00, 25.00),
     "claude-sonnet-5": _price(2.00, 10.00),

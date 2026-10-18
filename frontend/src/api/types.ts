@@ -1,6 +1,5 @@
 // TypeScript-зеркало docs/CONTRACTS.md §1, §7, §8.
-// Файл написан руками по контракту. Расхождение с контрактом — баг этого файла,
-// а не устаревший контракт: править здесь, эскалировать там.
+// Файл написан руками по docs/CONTRACTS.md и должен меняться вместе с ним.
 
 // ─── §1. Модель данных ──────────────────────────────────────────────────────
 
@@ -89,7 +88,10 @@ export interface AnswerPayload {
   limitations: Limitation[];
   /** true — корректный отказ, а не сбой. */
   refused: boolean;
-  /** corpus_version, retrieval_mode, prompt_version, model, latency_ms, cost_usd (§10). */
+  /**
+   * corpus_version, retrieval_mode, prompt_version, model, latency_ms, cost_usd (§10)
+   * и query_id — id записи журнала, по которому сохраняется отзыв (§8).
+   */
   meta: Record<string, unknown>;
 }
 
@@ -122,9 +124,6 @@ export interface Health {
   chunks: number;
   sources: number;
 }
-
-/** Экран «Проверка качества». Форма ответа контрактом не описана — наполняет T-31. */
-export type EvalSummary = Record<string, unknown>;
 
 export type ApiErrorCode = "bad_request" | "not_found" | "upstream" | "internal";
 

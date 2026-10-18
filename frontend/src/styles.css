@@ -1,0 +1,951 @@
+/* Минималистичный инструмент для чтения, не лендинг.
+   Монохром: графит и белый, одна гарнитура. Смелый элемент один — графитовая полоса
+   с вопросом на главной. Всё остальное — белый лист, разделы отделяются воздухом.
+   Цвет появляется только там, где он несёт смысл: отказ, ошибка, заинтересованный источник.
+   Ссылки того же цвета, что текст, поэтому отличаются подчёркиванием, а не цветом. */
+
+:root {
+  --bg: #ffffff;
+  --ink: #18191c;
+  --ink-muted: #5f6168;
+  --line: #e5e5e8;
+  --band: #1c1d21;
+  --accent: #18191c;
+  --accent-hover: #3a3b41;
+  --accent-soft: #efeff1;
+  --on-accent: #ffffff;
+  --on-accent-muted: rgba(255, 255, 255, 0.72);
+  --on-accent-line: rgba(255, 255, 255, 0.16);
+  --warn: #9a6b12;
+  --error: #b3261e;
+  --quote-bg: #f5f5f6;
+  --measure: 68ch;
+  --column: 720px;
+  --font: "Onest", -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.65 var(--font);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+
+a {
+  color: var(--accent);
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ── Шапка ─────────────────────────────────────────────────────────────── */
+
+.top {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 20px 24px;
+}
+
+.top a {
+  text-decoration: none;
+}
+
+.brand {
+  font-weight: 600;
+  color: var(--ink);
+  font-size: 17px;
+}
+
+.top nav {
+  margin-left: auto;
+  display: flex;
+  gap: 4px;
+}
+
+.top nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: 20px;
+  color: var(--ink-muted);
+  font-size: 15px;
+  transition: color 150ms ease, background-color 150ms ease;
+}
+
+.top nav a:hover {
+  color: var(--ink);
+}
+
+.top nav a.active {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+main {
+  padding-bottom: 96px;
+}
+
+.screen {
+  max-width: calc(var(--column) + 48px);
+  margin: 0 auto;
+  padding: 32px 24px 0;
+}
+
+h1 {
+  font-size: 30px;
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0 0 10px;
+}
+
+h2 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 14px;
+}
+
+.lead {
+  color: var(--ink-muted);
+  max-width: var(--measure);
+  margin: 0 0 32px;
+}
+
+.muted {
+  color: var(--ink-muted);
+}
+
+/* ── Полоса с вопросом: главный элемент страницы ──────────────────────── */
+
+.hero {
+  background: var(--band);
+  color: var(--on-accent);
+  padding: clamp(48px, 9vh, 88px) 24px clamp(40px, 7vh, 72px);
+}
+
+.hero-inner {
+  max-width: var(--column);
+  margin: 0 auto;
+}
+
+.hero :focus-visible {
+  outline-color: var(--on-accent);
+}
+
+/* Внутри белого поля белая обводка не видна. */
+.ask-row :focus-visible {
+  outline-color: var(--accent);
+}
+
+.ask-title {
+  display: block;
+  font-size: clamp(34px, 5.4vw, 52px);
+  line-height: 1.05;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  margin-bottom: 16px;
+}
+
+.ask-lead {
+  max-width: 54ch;
+  margin: 0 0 32px;
+  color: var(--on-accent-muted);
+  font-size: 17px;
+}
+
+.ask-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 6px 6px 22px;
+  background: var(--bg);
+  color: var(--ink);
+  border-radius: 999px;
+  transition: box-shadow 150ms ease;
+}
+
+.ask-row:focus-within {
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.28);
+}
+
+.ask-row input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 0;
+  font: 400 19px/1.3 var(--font);
+  border: none;
+  background: transparent;
+  color: inherit;
+}
+
+.ask-row input::placeholder {
+  color: #7c7e85;
+}
+
+.ask-row input:focus,
+.ask-row input:focus-visible {
+  outline: none;
+}
+
+/* Пока есть ответ, полоса сжимается до строки с полем. */
+.hero.compact {
+  padding-top: 20px;
+  padding-bottom: 24px;
+}
+
+.hero.compact .ask-title {
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.5;
+  color: var(--on-accent-muted);
+  margin-bottom: 8px;
+}
+
+.hero.compact .ask-lead {
+  display: none;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: inherit;
+  min-height: 40px;
+  padding: 0 18px;
+  border-radius: 20px;
+  transition: border-color 150ms ease, background-color 150ms ease, color 150ms ease;
+}
+
+button:hover:not(:disabled) {
+  border-color: var(--ink-muted);
+}
+
+button:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+button.primary {
+  min-height: 48px;
+  padding: 0 24px;
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--on-accent);
+  font-weight: 500;
+}
+
+button.primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+button.primary:disabled {
+  opacity: 1;
+  color: var(--ink-muted);
+  background: #e8e8eb;
+  border-color: #e8e8eb;
+}
+
+.link-button {
+  border: none;
+  border-radius: 4px;
+  min-height: 32px;
+  padding: 0;
+  background: none;
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+  text-decoration-color: #b5b6bb;
+}
+
+.link-button:hover:not(:disabled) {
+  text-decoration-color: currentColor;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ── Примеры запросов (на полосе) ──────────────────────────────────────── */
+
+.examples {
+  margin-top: 40px;
+}
+
+.examples h2 {
+  font-weight: 500;
+  color: var(--on-accent-muted);
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.examples ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 32px;
+}
+
+.examples li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--on-accent-line);
+}
+
+button.example {
+  border: none;
+  border-radius: 2px;
+  min-height: 0;
+  background: none;
+  padding: 0;
+  color: var(--on-accent);
+  font-weight: 500;
+  text-align: left;
+}
+
+button.example:hover:not(:disabled) {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+}
+
+.example-hint {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--on-accent-muted);
+}
+
+/* ── Разделы ответа ────────────────────────────────────────────────────── */
+
+.panel {
+  padding: 28px 0;
+  border-top: 1px solid var(--line);
+  animation: reveal 220ms ease-out both;
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Сразу под полосой линия-разделитель не нужна. */
+.screen > .panel:first-child {
+  border-top: none;
+}
+
+.answer-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.answer-head h2 {
+  margin: 0;
+}
+
+.panel-refused,
+.panel-error {
+  border-top: none;
+  margin-top: 1px;
+  padding-left: 20px;
+  box-shadow: inset 3px 0 0 var(--warn);
+}
+
+.panel-error {
+  box-shadow: inset 3px 0 0 var(--error);
+}
+
+.panel-refused h2 {
+  color: var(--warn);
+}
+
+.panel-error h2 {
+  color: var(--error);
+}
+
+.refused-lead {
+  color: var(--ink-muted);
+  max-width: var(--measure);
+  margin-top: 0;
+}
+
+.answer-body {
+  max-width: var(--measure);
+  font-size: 17px;
+}
+
+.answer-body p,
+.answer-body li {
+  line-height: 1.75;
+}
+
+.answer-body p:first-child {
+  margin-top: 0;
+}
+
+.answer-body ol,
+.answer-body ul {
+  padding-left: 22px;
+}
+
+button.cite-ref {
+  border: none;
+  border-radius: 3px;
+  min-height: 0;
+  background: none;
+  padding: 1px 4px;
+  color: var(--accent);
+  background: var(--accent-soft);
+  font-size: 0.8em;
+  font-weight: 500;
+  vertical-align: 0.3em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+button.cite-ref:hover {
+  color: var(--on-accent);
+  background: var(--accent);
+}
+
+/* ── Источники ─────────────────────────────────────────────────────────── */
+
+.citations {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.citation + .citation {
+  border-top: 1px solid var(--line);
+}
+
+.citation-head {
+  width: 100%;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  border: none;
+  border-radius: 0;
+  background: none;
+  padding: 12px 0;
+  text-align: left;
+}
+
+.citation-head:hover .citation-title {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+}
+
+.citation-n {
+  min-width: 2ch;
+  color: var(--ink-muted);
+  font-size: 14px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.citation-title {
+  flex: 1;
+  transition: color 150ms ease;
+}
+
+.citation-type,
+.citation-chevron {
+  color: var(--ink-muted);
+  font-size: 13px;
+}
+
+.citation-chevron {
+  width: 1ch;
+  text-align: center;
+}
+
+.citation-body {
+  padding: 0 0 18px 34px;
+  max-width: var(--measure);
+}
+
+.citation-heading-path {
+  font-size: 13px;
+  color: var(--ink-muted);
+  margin-bottom: 10px;
+}
+
+.citation-body blockquote {
+  margin: 0 0 12px;
+  padding: 14px 16px;
+  background: var(--quote-bg);
+  border-radius: 6px;
+  line-height: 1.7;
+}
+
+.citation-pdf {
+  display: block;
+  margin-top: 6px;
+}
+
+.citation-nourl {
+  color: var(--ink-muted);
+  font-size: 13px;
+}
+
+.citation-chunk-id {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--ink-muted);
+  word-break: break-all;
+}
+
+/* ── Ограничения ───────────────────────────────────────────────────────── */
+
+.limitations {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 18px;
+}
+
+.limitations li {
+  display: flex;
+  gap: 14px;
+  max-width: var(--measure);
+}
+
+.limitation-icon {
+  color: var(--ink-muted);
+  font-size: 12px;
+  line-height: 1.9;
+}
+
+.limitation-kind {
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+
+.limitation-text {
+  margin: 2px 0 0;
+}
+
+.limitation-sources {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--ink-muted);
+  word-break: break-all;
+}
+
+/* ── Оценка ответа ─────────────────────────────────────────────────────── */
+
+.feedback-comment {
+  display: block;
+  font-size: 14px;
+  color: var(--ink-muted);
+  margin-bottom: 8px;
+}
+
+.feedback textarea {
+  display: block;
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  font: inherit;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: inherit;
+  resize: vertical;
+}
+
+.feedback textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
+
+.feedback-buttons {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.error-text {
+  color: var(--error);
+  font-size: 13px;
+}
+
+/* ── Ожидание ответа ───────────────────────────────────────────────────── */
+
+.skeleton-line {
+  height: 10px;
+  margin: 14px 0;
+  border-radius: 5px;
+  background: linear-gradient(90deg, #eef0f2 25%, #f7f8f9 50%, #eef0f2 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+.skeleton-line.short {
+  width: 55%;
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  .skeleton-line {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ── Библиотека ────────────────────────────────────────────────────────── */
+
+.screen-wide {
+  max-width: calc(1072px + 48px);
+}
+
+.library-head h1 {
+  font-size: clamp(32px, 5vw, 46px);
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  margin: 7vh 0 14px;
+}
+
+.library-head .lead {
+  font-size: 18px;
+}
+
+.library-controls {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+
+.library-search {
+  width: 100%;
+  max-width: 520px;
+  min-height: 48px;
+  padding: 0 18px;
+  font-size: 17px;
+  font: inherit;
+  color: inherit;
+  background: var(--quote-bg);
+  border: 1px solid transparent;
+  border-radius: 22px;
+  transition: border-color 150ms ease, background-color 150ms ease;
+}
+
+.library-search:focus-visible {
+  outline: none;
+  background: var(--bg);
+  border-color: var(--accent);
+}
+
+.type-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+button.chip {
+  min-height: 40px;
+  padding: 0 16px;
+  font-size: 16px;
+  color: var(--ink-muted);
+}
+
+button.chip[aria-pressed="true"] {
+  color: var(--on-accent);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.chip-count {
+  margin-left: 4px;
+  opacity: 0.65;
+  font-variant-numeric: tabular-nums;
+}
+
+.library-status {
+  margin: 20px 0 0;
+  font-size: 16px;
+  color: var(--ink-muted);
+}
+
+.library-empty {
+  padding: 48px 0;
+  border-top: 1px solid var(--line);
+  margin-top: 24px;
+}
+
+.library-empty p {
+  margin: 0 0 14px;
+}
+
+.sources {
+  list-style: none;
+  margin: 24px 0 0;
+  padding: 0;
+  border-top: 1px solid var(--ink);
+}
+
+.source {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 16px 56px;
+  padding: 28px 0 30px;
+  border-bottom: 1px solid var(--line);
+}
+
+.source-title {
+  margin: 0;
+  font-size: 21px;
+  line-height: 1.35;
+  font-weight: 500;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.source-title a {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.source-title a:hover {
+  color: var(--ink);
+  text-decoration: underline;
+}
+
+.badge {
+  display: inline-block;
+  margin-left: 10px;
+  vertical-align: 2px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.6;
+  padding: 0 9px;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+
+.source-path {
+  margin-top: 4px;
+  font-size: 15px;
+  color: var(--ink-muted);
+  overflow-wrap: anywhere;
+}
+
+.source-notes {
+  margin-top: 18px;
+  max-width: var(--measure);
+}
+
+.source-notes h3 {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--ink-muted);
+}
+
+.source-notes ul {
+  margin: 0 0 6px;
+  padding-left: 18px;
+  font-size: 17px;
+  line-height: 1.65;
+}
+
+.source-notes li + li {
+  margin-top: 6px;
+}
+
+.source-notes li::marker {
+  color: var(--ink-muted);
+}
+
+.source-notes .link-button {
+  font-size: 16px;
+}
+
+.source-notes-empty {
+  margin: 18px 0 0;
+  font-size: 16px;
+  color: var(--ink-muted);
+}
+
+.source-meta {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  margin: 2px 0 0;
+  font-size: 16px;
+}
+
+.source-meta div {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: 12px;
+}
+
+.source-meta dt {
+  color: var(--ink-muted);
+  font-size: 15px;
+  line-height: 1.65;
+  padding-top: 1px;
+}
+
+.source-meta dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.stance-flagged {
+  color: var(--warn);
+  font-weight: 500;
+}
+
+/* ── Узкий экран ───────────────────────────────────────────────────────── */
+
+@media (max-width: 560px) {
+  .top {
+    padding: 14px 16px;
+    gap: 12px;
+  }
+
+  main {
+    padding-bottom: 64px;
+  }
+
+  .screen {
+    padding: 16px 16px 0;
+  }
+
+  .hero {
+    padding: 36px 16px 32px;
+  }
+
+  .ask-lead {
+    font-size: 16px;
+    margin-bottom: 24px;
+  }
+
+  .ask-row {
+    padding-left: 18px;
+  }
+
+  .ask-row input {
+    font-size: 17px;
+  }
+
+  button.primary {
+    padding: 0 18px;
+  }
+
+  .examples {
+    margin-top: 28px;
+  }
+
+  .examples ul {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  h1 {
+    font-size: 24px;
+  }
+
+  .citation-body {
+    padding-left: 0;
+  }
+
+  .citation-type {
+    display: none;
+  }
+
+  .source {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 22px 0 24px;
+  }
+
+  .source-title,
+  .source-path {
+    order: -2;
+  }
+
+  .source-meta {
+    order: -1;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: 12px;
+  }
+
+  .source-main {
+    display: contents;
+  }
+
+  .source-meta div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .library-head h1 {
+    margin-top: 12px;
+  }
+
+  .type-filter {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin: 0 -16px;
+    padding: 2px 16px 6px;
+    scrollbar-width: none;
+  }
+
+  button.chip {
+    flex: none;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 860px) and (min-width: 561px) {
+  .source {
+    grid-template-columns: minmax(0, 1fr) 260px;
+    gap: 16px 32px;
+  }
+}

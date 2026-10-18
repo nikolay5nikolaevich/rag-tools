@@ -16,17 +16,6 @@ services:
       timeout: 3s
       retries: 10
 
-  # Заглушка: наполнит T-22 (build backend/, `ev serve`). Не поднимается по умолчанию —
-  # только при явном `docker compose --profile full up`.
-  api:
-    image: python:3.12-slim
-    profiles: ["full"]
-    command: ["sleep", "infinity"]
-    depends_on:
-      db:
-        condition: service_healthy
-    environment:
-      EV_DATABASE_URL: postgresql://ergovault:ergovault@db:5432/ergovault
 
 volumes:
   db_data:

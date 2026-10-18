@@ -1,26 +1,29 @@
-"""Тесты T-11 на живой базе (docker compose up -d db; ev db upgrade).
+"""Тесты на живой базе (docker compose up -d db; ev db upgrade).
 
-Фикстура backend/tests/fixtures/{sources,chunks}.sample.jsonl не зависит от T-10: у всех
-её источников id под префиксом `fixture--`, чтобы upsert по PK `id` никогда не задел
+У всех источников фикстуры backend/tests/fixtures/{sources,chunks}.sample.jsonl
+id под префиксом `fixture--`, чтобы upsert по PK `id` никогда не задел
 реально загруженный корпус в той же базе. Изоляция от прогона к прогону — фильтром
-по corpus_version, не отдельной БД (см. docs/tickets/T-11-db.md, «compose-профиль test»
-как альтернатива testcontainers — здесь выбран более простой вариант: тот же db-сервис).
+по corpus_version, не отдельной БД: используется тот же db-сервис.
 """
 
 from __future__ import annotations
 
 import json
+from itertools import pairwise
 from pathlib import Path
 
 import psycopg
 import pytest
 
-from ergovault.index.migrate import upgrade
-from ergovault.index.repository import (
+from ergovault.db import (
+    embedding_coverage,
     get_chunk,
     list_sources,
     search_fts,
+    search_vector,
+    upgrade,
     upsert_chunks,
+    upsert_embeddings,
     upsert_sources,
 )
 from ergovault.models import Chunk, Source
@@ -151,7 +154,8 @@ def test_hit_components_carry_both_branches_separately(conn, loaded_fixture) -> 
     hits = search_fts(conn, "выставка контакты", k=SEARCH_K, profile="public")
     assert hits, "фикстура должна давать хотя бы одно совпадение"
     for hit in hits:
-        assert set(hit.components) == {"fts_ru", "fts_simple"}
+        assert {"fts_ru", "fts_simple"} <= set(hit.components)
+        assert hit.components["fts_all_terms"] in (0.0, 1.0)
         assert hit.score == pytest.approx(hit.components["fts_ru"] + hit.components["fts_simple"])
 
 
@@ -191,3 +195,110 @@ def test_get_chunk_roundtrip(conn, loaded_fixture) -> None:
 
 def test_get_chunk_missing_returns_none(conn, loaded_fixture) -> None:
     assert get_chunk(conn, "fixture--does-not-exist#000") is None
+
+
+# --- эмбеддинги: интерфейс записи и kNN ---
+#
+# Векторы фикстуры синтетические и попарно ортогональные (one-hot): косинус с реальными
+# BGE-векторами корпуса, если он лежит в той же dev-базе, около нуля, а самосовпадение
+# ровно 1.0 — поэтому проверки не зависят от того, загружен ли рядом настоящий корпус.
+# Один чанк намеренно остаётся без вектора: «нет эмбеддинга» — отдельный проверяемый
+# случай, а не край выдачи.
+DIM = get_settings().embed_dim
+NO_EMBEDDING_CHUNK = "fixture--wiki-final-report#000"
+PILOT_CHUNK = "fixture--raw-pilot-transcript#000"
+
+
+def _one_hot(position: int) -> list[float]:
+    vector = [0.0] * DIM
+    vector[position] = 1.0
+    return vector
+
+
+@pytest.fixture(scope="module")
+def embedded(conn, loaded_fixture):
+    """id фикстурного чанка -> позиция его единицы в one-hot векторе."""
+    _, chunks = loaded_fixture
+    positions = {
+        chunk.id: index
+        for index, chunk in enumerate(chunks)
+        if chunk.id != NO_EMBEDDING_CHUNK
+    }
+    upsert_embeddings(
+        conn, {cid: _one_hot(pos) for cid, pos in positions.items()}, dim=DIM
+    )
+    return positions
+
+
+def test_upsert_embeddings_reports_rows_it_actually_updated(conn, embedded) -> None:
+    known = next(iter(embedded))
+    updated = upsert_embeddings(
+        conn,
+        {known: _one_hot(embedded[known]), "fixture--does-not-exist#000": _one_hot(0)},
+        dim=DIM,
+    )
+    assert updated == 1, "несуществующий chunk_id не должен считаться записанным"
+    assert get_chunk(conn, "fixture--does-not-exist#000") is None, (
+        "репозиторий не создаёт чанки под сироту-эмбеддинг"
+    )
+
+
+def test_upsert_embeddings_rejects_wrong_dimension_without_writing(conn, embedded) -> None:
+    with pytest.raises(ValueError, match=str(DIM)):
+        upsert_embeddings(conn, {NO_EMBEDDING_CHUNK: [0.1, 0.2, 0.3]}, dim=DIM)
+    with conn.cursor() as cur:
+        cur.execute("SELECT embedding FROM chunks WHERE id = %s", (NO_EMBEDDING_CHUNK,))
+        assert cur.fetchone()[0] is None, "проверка размерности идёт до записи, а не после"
+
+
+def test_upsert_chunks_does_not_wipe_embedding(conn, loaded_fixture, embedded) -> None:
+    _, chunks = loaded_fixture
+    upsert_chunks(conn, chunks, corpus_version=CORPUS_VERSION)
+    target, position = next(iter(embedded.items()))
+    hits = search_vector(conn, _one_hot(position), k=1, profile="pilot")
+    assert hits and hits[0].chunk.id == target
+
+
+def test_search_vector_returns_exact_match_first(conn, embedded) -> None:
+    target = "fixture--topic-hub-crm#002"
+    hits = search_vector(conn, _one_hot(embedded[target]), k=5, profile="public")
+    assert hits[0].chunk.id == target
+    assert hits[0].score == pytest.approx(1.0, abs=1e-6)
+
+
+def test_search_vector_components_carry_distance_and_similarity(conn, embedded) -> None:
+    target = "fixture--company-alpha#000"
+    hits = search_vector(conn, _one_hot(embedded[target]), k=5, profile="public")
+    assert hits, "фикстура должна давать хотя бы одно совпадение"
+    for hit in hits:
+        assert set(hit.components) == {"vector", "cosine_distance"}
+        assert hit.score == pytest.approx(1.0 - hit.components["cosine_distance"])
+    assert [hit.rank for hit in hits] == list(range(1, len(hits) + 1))
+    assert all(a.score >= b.score for a, b in pairwise(hits))
+
+
+def test_search_vector_hides_pilot_from_public_profile(conn, embedded) -> None:
+    # Запрос — точный вектор pilot-чанка: при profile="public" он был бы первым,
+    # если бы фильтр visibility стоял в Python, а не в SQL.
+    hits = search_vector(conn, _one_hot(embedded[PILOT_CHUNK]), k=5, profile="public")
+    assert PILOT_CHUNK not in {hit.chunk.id for hit in hits}
+    assert all(hit.source.visibility == "public" for hit in hits)
+
+
+def test_search_vector_pilot_profile_sees_pilot_rows(conn, embedded) -> None:
+    hits = search_vector(conn, _one_hot(embedded[PILOT_CHUNK]), k=5, profile="pilot")
+    assert hits[0].chunk.id == PILOT_CHUNK
+
+
+def test_search_vector_skips_chunks_without_embedding(conn, loaded_fixture, embedded) -> None:
+    _, chunks = loaded_fixture
+    position = next(i for i, c in enumerate(chunks) if c.id == NO_EMBEDDING_CHUNK)
+    hits = search_vector(conn, _one_hot(position), k=5, profile="pilot")
+    assert NO_EMBEDDING_CHUNK not in {hit.chunk.id for hit in hits}
+
+
+def test_embedding_coverage_counts_only_filled_vectors(conn, loaded_fixture, embedded) -> None:
+    _, chunks = loaded_fixture
+    total, covered = embedding_coverage(conn, corpus_version=CORPUS_VERSION)
+    assert total == len(chunks)
+    assert covered == len(chunks) - 1  # ровно один чанк оставлен без вектора

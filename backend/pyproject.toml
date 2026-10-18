@@ -25,6 +25,9 @@ ev = "ergovault.cli:app"
 where = ["."]
 include = ["ergovault*"]
 
+[tool.setuptools.package-data]
+ergovault = ["prompts/*.md"]
+
 [tool.ruff]
 line-length = 100
 target-version = "py311"

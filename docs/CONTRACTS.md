@@ -1,48 +1,29 @@
-# ErgoVault RAG — контракты
+# ErgoVault RAG — форматы данных и гарантии
 
-> Единственный источник правды для всех исполнителей. Ни один тикет не меняет этот файл
-> самостоятельно: расхождение с контрактом = баг тикета. Изменение контракта — через тех-лида.
-> Версия контракта: `v1`.
+> Версия форматов: `v1`. Рефакторинг 10.09.2026 меняет расположение кода, но не данные.
+> Карта модулей, запуск и очередь — [ARCHITECTURE.md](ARCHITECTURE.md).
+> Действующие задания находятся в `docs/tickets/`.
 
-## 0. Границы ответственности
+## 0. Где находится код
 
-| Слой | Пакет | Тикет-владелец |
-|---|---|---|
-| Парсинг vault → Source/Chunk | `ergovault.ingest` | T-10 |
-| Хранение, миграции, поиск по БД | `ergovault.index` | T-11 |
-| Эмбеддинги | `ergovault.embed` | T-12 |
-| Стратегии поиска | `ergovault.retrieval` | T-20 |
-| Промпт, генерация, валидация ответа | `ergovault.generation` | T-21 |
-| HTTP API, журнал | `ergovault.api` | T-22 |
-| Метрики, судья, эксперимент | `ergovault.eval` | T-13 / T-23 / T-30 |
-| UI | `frontend/` | T-14 |
+- `ingest.py` и `chunking.py`: документы → Source/Chunk → JSONL.
+- `indexing.py`: подготовка базы, кэш и запуск векторизации.
+- `embeddings.py`: модель и кодирование; веса загружаются только при необходимости.
+- `db.py`: SQL, миграции, загрузка, фильтр видимости.
+- `search.py`: общий поиск для приложения и оценки качества.
+- `llm/`: два способа обращения к Claude.
+- `eval/`: вопросы, прогоны и метрики.
+- `cli.py`: только команды; прикладной код не зависит от Typer.
+- `models.py`, `settings.py`: данные и конфигурация.
 
-### Как тикет добавляет свою команду в `ev`
+- `answering.py`, `prompts/`: ответ по найденным фрагментам, проверка, ограничения (§7).
+- `api.py`: HTTP-слой (§8) — разбор запроса, вызов поиска и ответа, журнал, коды ошибок.
 
-Корневой `backend/ergovault/cli.py` принадлежит T-00, и **исполнители его не редактируют**.
-Он подключает подкоманды лениво: пытается импортировать `ergovault.<пакет>.cli` и, если модуля
-нет, просто не показывает команду. Ещё не написанный пакет не ломает чужие команды.
+Прикладной логики в `api.py` нет: поиск остаётся в `search.py`, ответ — в `answering.py`,
+SQL и журнал — в `db.py`.
+Команды объявляются явно в одном `cli.py`; основной запуск подготовки — `ev prepare`.
 
-Чтобы добавить свою команду, тикет создаёт **только** файл в своём пакете:
-
-| Файл тикета | Появляется команда | Тикет |
-|---|---|---|
-| `ergovault/ingest/cli.py` | `ev ingest` | T-10 |
-| `ergovault/index/cli.py` | `ev db` | T-11 |
-| `ergovault/embed/cli.py` | `ev embed` | T-12 |
-| `ergovault/eval/cli.py` | `ev eval` | T-13 |
-| `ergovault/api/cli.py` | `ev serve` | T-22 |
-
-В модуле объявляется `app = typer.Typer()`. Импорт модуля не должен делать ничего, кроме
-объявления команд: ни подключения к базе, ни загрузки модели — `ev --help` обязан работать
-без Postgres и без весов эмбеддера.
-
-Так пять параллельных исполнителей не редактируют один общий файл и не конфликтуют в git.
-
-Пересекать границы запрещено. Нужен чужой код — импортируй его публичный интерфейс,
-описанный ниже; если интерфейса нет — это блокер, эскалируй, а не дописывай чужой пакет.
-
-## 1. Модель данных (pydantic v2, `ergovault/models.py`, владелец T-00)
+## 1. Модель данных (pydantic v2, `ergovault/models.py`)
 
 ```python
 SourceType = Literal["video-source", "video-theses", "topic-hub", "article",
@@ -79,7 +60,7 @@ class Chunk(BaseModel):
     quote_anchor: str            # первые ≤120 символов text, для подсветки во фронте
 ```
 
-Инварианты (покрываются тестами T-10):
+Инварианты покрываются тестами:
 - `chunk.id` уникален по корпусу; `source_id` всегда существует в `sources`.
 - `heading_path` непустой; для преамбулы — `["_intro"]`.
 - Чанк не длиннее 4000 символов и не короче 80 (для `atomic` минимум 40).
@@ -107,7 +88,7 @@ class Chunk(BaseModel):
 Правило: значение, начинающееся с «не указан», «не предоставл», «нет ссылки», «unknown»,
 или не начинающееся с `http` — это `None`. То же для `duration`, `published`, `channel`.
 
-## 3. Чанкинг (нормативно, T-10)
+## 3. Чанкинг (нормативно)
 
 1. Отрезать frontmatter, распарсить в метаданные.
 2. Резать по `##` и `###`. Секция = чанк, `heading_path` — цепочка заголовков.
@@ -142,7 +123,7 @@ class Chunk(BaseModel):
 придёт в ответ без оговорки — а именно эти оговорки и есть содержимое блока «Ограничения»
 (спека 5.3: они извлекаются, а не генерируются).
 
-## 4. Атрибуция источников (T-10, детерминированные правила)
+## 4. Атрибуция источников (детерминированные правила)
 
 ### Маппинг `type` корпуса в `SourceType` контракта
 
@@ -183,7 +164,7 @@ class Chunk(BaseModel):
 из тринадцати, поэтому полагаться на него нельзя. Fuzzy-матчинг по названиям запрещён: ошибка
 здесь означает, что пересказ и оригинал будут засчитаны как два независимых подтверждения.
 
-## 5. Схема БД (PostgreSQL 16 + pgvector, владелец T-11)
+## 5. Схема БД (PostgreSQL 16 + pgvector)
 
 ```sql
 CREATE EXTENSION IF NOT EXISTS vector;
@@ -227,26 +208,65 @@ CREATE TABLE query_log (
   retrieved jsonb NOT NULL,     -- [{chunk_id, score, rank}]
   answer jsonb,                 -- AnswerPayload целиком
   latency_ms int, cost_usd numeric(10,6), error text,
-  feedback text                 -- null | 'useful' | 'wrong'
+  feedback text,                -- null | 'useful' | 'wrong'
+  feedback_comment text         -- необязательный текст отзыва (миграция 002)
 );
 ```
 
-## 6. Интерфейс поиска (T-20)
+`feedback_comment` добавлен отдельной миграцией под T-22: вердикт без пояснения часто
+не даёт понять, что именно не так с ответом. Поле nullable — комментарий необязателен,
+и пустое поле хранится как NULL, а не как пустая строка.
+
+### Публичный интерфейс модуля `db`
+
+Никто, кроме `ergovault.db`, не пишет SQL — остальные слои ходят через эти функции:
+
+```python
+upsert_sources(conn, sources, *, corpus_version) -> None
+upsert_chunks(conn, chunks, *, corpus_version) -> None        # embedding не трогает
+upsert_embeddings(conn, {chunk_id: vector}, *, dim) -> int    # -> число обновлённых строк
+embedding_coverage(conn, *, corpus_version=None) -> tuple[int, int]   # (всего, с вектором)
+get_chunk(conn, chunk_id) -> Chunk | None
+list_sources(conn, profile) -> list[Source]
+search_fts(conn, query, k, *, profile, weight_ru, weight_simple) -> list[Hit]
+search_vector(conn, embedding, k, *, profile) -> list[Hit]
+get_chunk_view(conn, chunk_id, profile) -> tuple[Chunk, Source] | None
+corpus_counts(conn, profile) -> tuple[int, int]              # (источников, чанков)
+insert_query_log(conn, *, question, profile, retrieval_mode, corpus_version,
+                 prompt_version, model, retrieved, answer=None, latency_ms=None,
+                 cost_usd=None, error=None) -> str           # -> id записи журнала
+set_feedback(conn, query_id, verdict, comment=None) -> bool  # False — записи нет
+```
+
+`upsert_embeddings` проверяет размерность до записи и никогда не создаёт чанки: вектор без
+строки в `chunks` — рассинхрон кэша с базой, о нём сообщается числом обновлённых строк, а не
+молчаливой вставкой. `search_vector` принимает уже посчитанный вектор (модель грузит
+`ergovault.embeddings`), отсекает `embedding IS NULL` в SQL и возвращает `score` как косинусную
+близость `1 - distance`, чтобы «больше = лучше» совпадало с fts-ветвью и RRF работал
+с однонаправленными величинами.
+
+## 6. Интерфейс поиска
 
 ```python
 class Hit(BaseModel):
     chunk: Chunk; source: Source; score: float; rank: int; components: dict[str, float]
 
-class Retriever(Protocol):
-    name: str   # "fts" | "vector" | "hybrid"
-    def search(self, query: str, k: int = 10, *, profile: Profile) -> list[Hit]: ...
+def search(conn, query: str, k: int = 10, *, profile: Profile,
+           mode: Literal["fts", "vector", "hybrid"] | None = None,
+           settings: Settings | None = None, encode_query=None) -> list[Hit]: ...
 ```
 
 Гибрид — RRF (`score = Σ 1/(60 + rank_i)`), веса в конфиге. `components` обязателен: без него
 не отладить, почему имя собственное не нашлось. Профиль фильтрует по `visibility` **в SQL**, не
 в Python: утечка pilot-контента в public — дефект уровня «стоп-релиз».
 
-## 7. Контракт ответа (T-21, он же контракт фронта T-14)
+Полнотекстовая ветвь находит чанк по любому значимому слову вопроса; чанки со всеми словами
+(`components["fts_all_terms"] = 1`) идут первыми. Для `simple` стоп-слова отбрасываются по
+словарю `russian`. Во всех режимах в top-k попадает не больше одного чанка источника
+(`search.MAX_CHUNKS_PER_SOURCE`). Оригинал и пересказ — разные источники и не схлопываются.
+Обоснование и замеры — `eval/reports/retrieval-comparison.md`.
+
+## 7. Контракт ответа
 
 ```python
 class Citation(BaseModel):
@@ -268,7 +288,7 @@ class AnswerPayload(BaseModel):
     meta: dict                # corpus_version, retrieval_mode, prompt_version, model, latency_ms, cost_usd
 ```
 
-Программные (не модельные) гарантии, покрытые тестами T-21:
+Программные (не модельные) гарантии, покрытые тестами:
 
 - каждый `[n]` в `answer_markdown` имеет Citation; лишних Citation нет;
 - `Citation.quote` — точная подстрока переданного чанка (нормализация пробелов допустима);
@@ -283,18 +303,95 @@ class AnswerPayload(BaseModel):
 - Схлопывание подтверждений — по `speaker_org`, для `derived` — по `derived_of`. Файл ≠ источник:
   оригинал видео и его пересказ никогда не считаются двумя подтверждениями.
 
-## 8. HTTP API (T-22)
+### 7.1. Реализация (`answering.py`)
+
+- `answer(conn, question, *, profile, mode=None, k=None)` ищет фрагменты и вызывает
+  `answer_hits(question, hits, *, sources, retrieval_mode)`; вторая функция — вход для оценки.
+  `sources` — каталог `db.list_sources(conn, profile)`: пересказ получает `speaker_org`,
+  `stance` и `reliability_note` оригинала, даже если оригинал не попал в выдачу.
+  Одинаковая оговорка у нескольких процитированных источников (обычно оригинал и
+  пересказ) выводится одним `reliability_note` со всеми их `source_ids`.
+- Промпт — `prompts/{prompt_version}.system.md` и `.user.md`. Модель получает вопрос и
+  нумерованные фрагменты (название, тип, язык, дата публикации, длительность, путь
+  заголовков, текст) и возвращает `{"answer_markdown", "cited", "refused"}`. URL,
+  `speaker_org`, `stance`, `reliability_note` и `derived` модели не передаются.
+  Язык, дата и длительность нужны для вопросов о самих материалах (категория F
+  проверочного набора): эти сведения лежат в полях `Source`, а не в тексте чанка.
+  Отсутствующее значение передаётся как «не указана» — заглушка корпуса (§2) не
+  заменяется правдоподобным числом.
+- `Citation.n` — номер фрагмента в промпте. Номера в тексте и `cited` совпадают и лежат
+  в диапазоне переданных фрагментов; ответ без ссылок допустим только при отказе.
+  Цитата «…» со ссылкой сразу после неё обязана найтись в тексте, названии или заголовках
+  именно этих фрагментов (без учёта регистра, ё/е, пробелов, markdown и вида тире;
+  многоточие — пропуск). `Citation.quote` выбирает код: предложение фрагмента, ближайшее
+  к тексту ответа у ссылки, обрезанное до 300 символов.
+- Нехватка данных — `AnswerPayload(refused=True)` с объяснением и `no_data`; при пустой
+  выдаче поиска модель не вызывается. Сбой модели (`LLMError`) и ответ, не прошедший
+  проверку (`AnswerValidationError` с `raw_text` и `meta` для журнала), — исключения.
+- `meta`: `corpus_version`, `retrieval_mode`, `prompt_version`, `prompt_hash`, `model`,
+  `llm_backend`, `latency_ms` (вся функция), `llm_latency_ms`, `cost_usd` (расчёт по токенам),
+  `raw_cost_usd` (значение бэкенда), токены; у `answer` ещё `profile` и `search_latency_ms`.
+
+## 8. HTTP API
 
 ```
 POST /api/ask          {question, profile?, retrieval_mode?} -> AnswerPayload
 GET  /api/sources      -> [Source]   (public-профиль по умолчанию)
 GET  /api/chunks/{id}  -> {chunk, source}
 POST /api/feedback     {query_id, verdict: "useful"|"wrong", comment?} -> 204
-GET  /api/eval/summary -> результаты последнего прогона (экран «Проверка качества»)
+GET  /api/eval/summary -> результаты последнего прогона (фронтенд не использует)
 GET  /healthz          -> {status, corpus_version, chunks, sources}
 ```
 
 Ошибки: `{"error": {"code": str, "message": str}}`, коды `bad_request|not_found|upstream|internal`.
+
+Формат ошибки един для всех ответов, включая ответы самого фреймворка (неизвестный адрес,
+метод, нечитаемое тело): наружу выходит код §8 и сообщение на русском, traceback и текст
+исключения остаются в логе сервера.
+
+`/api/ask` возвращает `meta.query_id` — id записи `query_log`, по нему сохраняется отзыв.
+В журнал пишется и удачный ответ, и сбой генерации (`error`): без второго журнал показывал
+бы качество выше фактического. `POST /api/feedback` принимает необязательный `comment`
+(поле `feedback_comment`, миграция 002).
+
+Параметр `profile` (тело `/api/ask`, query-параметр `/api/sources` и `/api/chunks/{id}`)
+публичный инстанс (`EV_PROFILE=public`) **не принимает вообще** — запрос с ним отклоняется
+как `bad_request`. Видимость фильтруется в SQL: закрытый источник недоступен ни через поиск,
+ни через каталог, ни по прямой ссылке на чанк. `chunk_id` содержит `#` и в URL кодируется.
+
+`/api/eval/summary` — одна схема на два состояния:
+
+```python
+class EvalRunSummary(BaseModel):    # метрика None = не измерена, это не ноль
+    label: str; mode: str; k: int; n_questions: int; title: str
+    recall_at_k: float | None; mrr: float | None
+    recall_note: str                # почему метрики нет: «неприменимо: поиска нет»
+    refusal_precision: float | None; refusal_recall: float | None
+    must_contain_rate: float | None; grounded_rate: float | None
+    median_latency_ms: float | None; cost_usd_per_question: float | None
+
+class EvalJudgeSummary(BaseModel):  # проверка судьи; available=False — разметки не хватает
+    available: bool; message: str; n_labeled: int
+    agreement: float | None; cohen_kappa: float | None; self_consistency: float | None
+
+class EvalSummary(BaseModel):
+    available: bool                 # False — прогонов ещё не было, runs пуст
+    message: str                    # готовая формулировка для экрана
+    generated_at: str | None; corpus_version: str | None; prompt_version: str | None
+    sample_size_caveat: str         # оговорка о размере выборки, приходит всегда
+    runs: list[EvalRunSummary]
+    judge: EvalJudgeSummary | None  # None — судья не проверялся
+    limitations: list[str]          # оговорки прогона, показываются рядом с числами
+    report_path: str | None         # путь к полному отчёту в репозитории
+```
+
+Источник данных — `eval/reports/summary.json`; его пишет T-30. Файла нет — `available=false`
+и явное «прогонов не было»: отсутствие измерений не показывается нулями.
+
+`label` — вариант сравнения (`no_search`, `fts`, `rag`, `full_corpus`), а не режим поиска:
+`recall_at_k` и `mrr` приходят только у вариантов с поиском, у остальных они `None`
+с объяснением в `recall_note`. `grounded_rate` приходит `None`, пока `judge.available`
+ложно: подтверждённость не публикуется без согласия судьи с ручной разметкой.
 
 ## 9. Конфигурация
 
@@ -302,22 +399,27 @@ GET  /healthz          -> {status, corpus_version, chunks, sources}
 `EV_PROFILE=public|pilot`, `EV_DATABASE_URL`, `EV_EMBED_MODEL=BAAI/bge-m3`,
 `EV_GEN_MODEL=claude-opus-5`, `EV_JUDGE_MODEL=claude-sonnet-5`, `EV_RETRIEVAL_MODE=hybrid`,
 `EV_TOP_K=8`, `EV_CORPUS_VERSION=v1`, `EV_PROMPT_VERSION=p1`,
-`EV_LLM_BACKEND=cli|api`, `EV_ANTHROPIC_API_KEY` (опционален).
+`EV_LLM_BACKEND=cli|api`, `EV_ANTHROPIC_API_KEY` (опционален),
+`EV_CORS_ORIGINS` — адреса фронтенда через запятую (по умолчанию `http://localhost:5173`
+и `http://127.0.0.1:5173`).
 
 ### Доступ к модели: подписка, а не ключ
 
 Основной режим — `EV_LLM_BACKEND=cli`: генерация идёт через Claude Code CLI в headless-режиме
 по подписке, платный API-ключ не нужен. Весь код ходит в модель **только** через
-`ergovault.llm.LLMProvider` (T-15); прямые вызовы SDK из других пакетов запрещены.
+`ergovault.llm.LLMProvider`; прямые вызовы SDK из других модулей запрещены.
 
-Два следствия, которые обязаны быть отражены в отчёте:
+Для отчёта T-30:
 
-- headless-режим добавляет ~17 000 токенов служебного промпта Claude Code к каждому вызову
-  (замеры и флаги минимизации — в T-15). Поэтому `total_cost_usd`, сообщаемый CLI, в отчёт
-  не идёт: стоимость считается по прайсу от наших собственных токенов;
-- в headless-режиме **нельзя задать temperature**. Для судьи (T-23) это означает, что
-  детерминизм не гарантирован конструкцией и должен быть измерен: повторные прогоны и
-  зафиксированный разброс вместо утверждения «temperature=0».
+- `billed_cost_usd` рассчитывается по полям usage. Перед экспериментом проверить состав
+  токенов и тарифы; расчётную стоимость, значение CLI и фактические списания обозначать отдельно.
+- Текущий CLI-бэкенд не задаёт temperature и игнорирует `cache_system`.
+  Измерять разброс и фактическое использование кэша; не заявлять детерминизм,
+  исключённый оверхед или одинаковую стоимость служебной части без проверки.
+- CLI-бэкенд передаёт сообщение через stdin (командная строка Windows ограничена 32 767
+  символами) и отключает все встроенные инструменты (`--tools ""`). Со списком запретов
+  модель получала новые инструменты CLI, делала несколько ходов за вызов, и `cache_read`
+  доходил до ~150 тыс. токенов; прогоны до 11.09.2026 со старым флагом несопоставимы по стоимости.
 
 Индексация в обоих режимах работает без единого внешнего ключа — эмбеддинги локальные.
 Это требование раздела 9 спеки, и оно не зависит от способа доступа к генератору.

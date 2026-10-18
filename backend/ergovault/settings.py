@@ -31,6 +31,9 @@ class Settings(BaseSettings):
     judge_model: str = "claude-sonnet-5"
     anthropic_api_key: str | None = None
 
+    # Адреса фронтенда, которым API разрешает запросы (CORS). Список через запятую.
+    cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
+
     retrieval_mode: Literal["fts", "vector", "hybrid"] = "hybrid"
     top_k: int = 8
     rrf_k: int = 60
@@ -44,6 +47,10 @@ class Settings(BaseSettings):
     @property
     def index_dir(self) -> Path:
         return self.corpus_dir / "index"
+
+    @property
+    def cors_origin_list(self) -> list[str]:
+        return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
 
     @property
     def visibilities(self) -> tuple[str, ...]:
